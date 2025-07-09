@@ -1,0 +1,32 @@
+package istad.co.darambbankingapi.domain;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Table(name = "user_accounts")
+public class UserAccount {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
+    private LocalDateTime createdAt;
+
+    private Boolean isDeleted;
+}

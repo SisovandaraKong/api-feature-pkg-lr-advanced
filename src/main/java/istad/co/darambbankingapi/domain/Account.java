@@ -1,0 +1,40 @@
+package istad.co.darambbankingapi.domain;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Table(name = "accounts")
+public class Account {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false, length = 9)
+    private String actNo;
+
+    @Column(unique = true, length = 100)
+    private String actName;
+
+    private BigDecimal transferLimit;
+
+    // Any accounts have a type
+    @ManyToOne
+    @JoinColumn(name = "account_type_id")
+    private AccountType accountType;
+
+    // Any Accounts have a user
+    @OneToMany(mappedBy = "account")
+    private List<UserAccount> userAccountList;
+
+    @OneToOne
+    private Card card;
+}
