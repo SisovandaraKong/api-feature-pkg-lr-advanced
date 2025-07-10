@@ -25,16 +25,17 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "transfer_receiver_id")
-    private Account transferReceiver;
+    private Account transferReceiver; //user when transactionType is transfer
 
     private String paymentReceiver;
 
     private BigDecimal amount;
 
+    @Column(columnDefinition = "TEXT")
     private String remark;
 
     @Column(nullable = false,length = 100)
-    private String transactionType;
+    private String transactionType; // transfer and payment
 
     private Boolean status;
 

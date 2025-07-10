@@ -26,7 +26,10 @@ public class User {
     private String nationalCardId;
 
     @Column(nullable = false)
-    private Integer pin;
+    private Integer pin; //store 4 digit
+
+    @Column(length = 10, nullable = false, unique = true)
+    private String phoneNumber;
 
     @Column(nullable = false)
     private String password;
@@ -48,6 +51,9 @@ public class User {
     private String khanOrDistrict;
 
     @Column(length = 100)
+    private String sangkatOrCommune;
+
+    @Column(length = 100)
     private String village;
 
     @Column(length = 100)
@@ -65,10 +71,7 @@ public class User {
     private String nameSourceOfIncome;
 
     @Column(length = 100)
-    private BigDecimal monthlyIncomeRance;
-
-    @Column(length = 10, nullable = false, unique = true)
-    private String phoneNumber;
+    private BigDecimal monthlyIncomeRange;
 
     @Column(unique = true)
     private String oneSignalId;
