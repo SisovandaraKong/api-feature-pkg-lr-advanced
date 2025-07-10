@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -20,22 +22,74 @@ public class User {
     @Column(unique = true, nullable = false)
     private String uuid;
 
+    @Column(nullable = false, unique = true)
+    private String nationalCardId;
+
+    @Column(nullable = false)
+    private Integer pin;
+
+    @Column(nullable = false)
+    private String password;
+
     @Column(length = 50)
     private String name;
 
-    @Column(length = 8)
+    private String profileImage;
+
+    @Column(length = 8, nullable = false)
     private String gender;
+
+    private LocalDateTime dob;
+
+    @Column(length = 100)
+    private String cityOrProvince;
+
+    @Column(length = 100)
+    private String khanOrDistrict;
+
+    @Column(length = 100)
+    private String village;
+
+    @Column(length = 100)
+    private String street;
+
+    @Column(length = 100)
+    private String employeeType;
+
+    private String position;
+
+    @Column(length = 100)
+    private String companyName;
+
+    @Column(length = 100)
+    private String nameSourceOfIncome;
+
+    @Column(length = 100)
+    private BigDecimal monthlyIncomeRance;
+
+    @Column(length = 10, nullable = false, unique = true)
+    private String phoneNumber;
 
     @Column(unique = true)
     private String oneSignalId;
 
-    @Column(unique = true)
-    private String studentIdCard;
-
-    private Boolean isStudent;
-
     private Boolean isDeleted;
+    private Boolean isStudent;
+    private Boolean isBlocked;
+
+    @Column(unique = true, nullable = false)
+    private String studentCardId;
 
     @OneToMany(mappedBy = "user")
     private List<UserAccount> userAccountList;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    // This means when we fetch user,
+    // it will fetch all roles that related to that user too
+    @JoinTable(name = "users_roles"
+    ,joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id")
+    ,inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private List<Role> roles;
+
+    private LocalDateTime createdAt;
 }

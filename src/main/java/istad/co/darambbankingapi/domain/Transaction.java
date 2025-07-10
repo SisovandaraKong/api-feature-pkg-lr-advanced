@@ -20,20 +20,26 @@ public class Transaction {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private Account sender;
+    @JoinColumn(name = "owner_id")
+    private Account owner;
 
     @ManyToOne
-    @JoinColumn(name = "receiver_id")
-    private Account receiver;
+    @JoinColumn(name = "transfer_receiver_id")
+    private Account transferReceiver;
+
+    private String paymentReceiver;
 
     private BigDecimal amount;
 
     private String remark;
 
+    @Column(nullable = false,length = 100)
+    private String transactionType;
+
+    private Boolean status;
+
     private Boolean isPayment;
 
     private LocalDateTime transactionAt;
 
-    private Boolean isDeleted;
 }
