@@ -42,7 +42,7 @@ public class User {
     @Column(length = 8, nullable = false)
     private String gender;
 
-    private LocalDateTime dob;
+    private LocalDateTime dob; //dateOfBirth
 
     @Column(length = 100)
     private String cityOrProvince;

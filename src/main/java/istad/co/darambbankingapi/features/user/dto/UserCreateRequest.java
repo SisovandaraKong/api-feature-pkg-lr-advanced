@@ -5,15 +5,16 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 public record UserCreateRequest(
-        @NotNull
+        @NotBlank
         @Size(max = 20)
         String nationalCardId,
+        @NotNull
+        @Positive
         @Min(4)
         @Max(4)
-        @Positive
         Integer pin,
         @NotBlank
-        @Size(min = 8, max = 10)
+        @Size(max = 20)
         String phoneNumber,
         @NotBlank
         String password,
@@ -23,7 +24,6 @@ public record UserCreateRequest(
         @NotBlank
         @Size(max = 6)
         String gender,
-        @NotNull
         LocalDate dob,
         @Size(max = 20)
         String studentCardId
