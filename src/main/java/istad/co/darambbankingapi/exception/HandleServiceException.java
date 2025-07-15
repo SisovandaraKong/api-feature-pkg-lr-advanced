@@ -13,15 +13,14 @@ import java.util.Objects;
 @RestControllerAdvice
 public class HandleServiceException {
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<?> handleServiceException(ResponseStatusException exception) {
-        return new ResponseEntity<>(
-                Map.of(
-                        "message", "Error Business Logic",
-                        "status", exception.getStatusCode().value(),
-                        "timestamp", LocalDateTime.now(),
-                        "details", exception.getReason()
-                ), HttpStatus.BAD_REQUEST
-        );
+    public ResponseEntity<?> handleServiceException(ResponseStatusException exception){
+        return new ResponseEntity<>(Map.of(
+                "message", "Error business login",
+                "status", exception.getStatusCode().value(),
+                "timestamp", LocalDateTime.now(),
+                "details", exception.getReason()
+        ),HttpStatus.BAD_REQUEST);
     }
+
 }
 

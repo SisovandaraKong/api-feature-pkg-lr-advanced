@@ -10,14 +10,15 @@ public record UserCreateRequest(
         String nationalCardId,
         @NotNull
         @Positive
-        @Min(4)
-        @Max(4)
+                @Max(9999)
         Integer pin,
         @NotBlank
         @Size(max = 20)
         String phoneNumber,
         @NotBlank
         String password,
+        @NotBlank
+        String confirmedPassword,
         @NotBlank
         @Size(max = 40)
         String name,

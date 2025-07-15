@@ -86,7 +86,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserAccount> userAccountList;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL)
     // This means when we fetch user,
     // it will fetch all roles that related to that user too
     @JoinTable(name = "users_roles"
