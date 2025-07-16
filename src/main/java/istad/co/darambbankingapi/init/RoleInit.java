@@ -10,7 +10,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class DataInit {
+public class RoleInit {
     private final RoleRepository roleRepository;
 
     @PostConstruct

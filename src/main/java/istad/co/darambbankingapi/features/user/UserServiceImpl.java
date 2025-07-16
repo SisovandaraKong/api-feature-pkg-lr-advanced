@@ -2,6 +2,8 @@ package istad.co.darambbankingapi.features.user;
 
 import istad.co.darambbankingapi.domain.Role;
 import istad.co.darambbankingapi.domain.User;
+import istad.co.darambbankingapi.features.user.dto.ChangePasswordUser;
+import istad.co.darambbankingapi.features.user.dto.UpdateProfileUser;
 import istad.co.darambbankingapi.features.user.dto.UserCreateRequest;
 import istad.co.darambbankingapi.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -51,4 +53,25 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
     }
 
+    @Override
+    public void changePasswordUser(String uuid, ChangePasswordUser changePasswordUser) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found"));
+        if (!changePasswordUser.oldPassword().equals(user.getPassword())){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Old Password does not match");
+        }
+        if (!changePasswordUser.confirmedPassword().equals(changePasswordUser.newPassword())){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Confirmed password does not match");
+        }
+        user.setPassword(changePasswordUser.newPassword());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void updateProfileUser(String uuid, UpdateProfileUser updateProfileUser) {
+    User user = userRepository.findByUuid(uuid)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found"));
+    userMapper.updateUser(updateProfileUser, user);
+    userRepository.save(user);
+    }
 }
