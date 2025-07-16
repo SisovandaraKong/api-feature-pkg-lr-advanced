@@ -5,6 +5,7 @@ import istad.co.darambbankingapi.domain.User;
 import istad.co.darambbankingapi.features.user.dto.ChangePasswordUser;
 import istad.co.darambbankingapi.features.user.dto.UpdateProfileUser;
 import istad.co.darambbankingapi.features.user.dto.UserCreateRequest;
+import istad.co.darambbankingapi.features.user.dto.UserDetailsResponse;
 import istad.co.darambbankingapi.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,16 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+
+    @Override
+    public List<UserDetailsResponse> getAllUsersDetails() {
+        List<User> users = userRepository.findAll();
+        return users
+                .stream()
+                .map(userMapper::toUserDetailsResponse)
+                .toList();
+    }
+
     @Override
     public void createNew(UserCreateRequest userCreateRequest) {
     if (userRepository.existsByNationalCardId(userCreateRequest.nationalCardId())){

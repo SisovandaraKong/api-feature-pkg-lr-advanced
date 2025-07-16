@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -16,6 +17,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+
+    @GetMapping
+    public ResponseEntity<?> getDetailsAllUsers() {
+        return new ResponseEntity<>(
+                Map.of(
+                        "users", userService.getAllUsersDetails()
+                ), HttpStatus.OK
+        );
+    }
 
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
