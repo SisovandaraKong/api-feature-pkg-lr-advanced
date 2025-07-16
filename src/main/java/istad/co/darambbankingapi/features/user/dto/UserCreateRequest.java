@@ -3,6 +3,7 @@ package istad.co.darambbankingapi.features.user.dto;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record UserCreateRequest(
         @NotBlank
@@ -27,6 +28,8 @@ public record UserCreateRequest(
         String gender,
         LocalDate dob,
         @Size(max = 20)
-        String studentCardId
+        String studentCardId,
+        @NotEmpty
+        List<RoleRequest> roles
 ) {
 }

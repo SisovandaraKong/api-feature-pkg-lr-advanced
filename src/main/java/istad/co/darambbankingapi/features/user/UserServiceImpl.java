@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,11 +56,37 @@ public class UserServiceImpl implements UserService{
         user.setIsBlocked(false);
         user.setIsDeleted(false);
 
-        //Assign default user role
-        List<Role> roles = new ArrayList<>();
+        //Assign default user role by teacher
+//        List<Role> roles = new ArrayList<>();
+//        Role userRole = roleRepository.findByName("USER")
+//                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Role USER not found"));
+//        //Create dynamic roles from clients
+//        userCreateRequest.roles()
+//                        .forEach(role -> {
+//                            Role newRole = roleRepository.findByName(role.name())
+//                                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Role "+ userCreateRequest.roles()+" NOT found"));
+//                            roles.add(newRole);
+//                        });
+//        roles.add(userRole);
+//        user.setRoles(roles);
+//        userRepository.save(user);
+
+        // By me
+        // Add default USER role
         Role userRole = roleRepository.findByName("USER")
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Role USER not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Role USER not found"));
+
+        //Assign default user role
+        List<Role> roles = userCreateRequest.roles().stream()
+                .map(role -> roleRepository.findByName(role.name())
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, "Role " + role.name() + " not found")))
+                .collect(Collectors.toList());
+
+
         roles.add(userRole);
+
         user.setRoles(roles);
         userRepository.save(user);
     }
