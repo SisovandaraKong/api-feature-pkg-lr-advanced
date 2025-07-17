@@ -4,8 +4,10 @@ import istad.co.darambbankingapi.base.BasedMessage;
 import istad.co.darambbankingapi.features.user.dto.ChangePasswordUser;
 import istad.co.darambbankingapi.features.user.dto.UpdateProfileUser;
 import istad.co.darambbankingapi.features.user.dto.UserCreateRequest;
+import istad.co.darambbankingapi.features.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +32,13 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> getAllUsers(@RequestParam(required = false, defaultValue = "0") int page,
                                              @RequestParam(required = false,defaultValue = "2")int size) {
+        Page<UserResponse> userPage = userService.getAllUsers(page, size);
         return new ResponseEntity<>(Map.of(
-                "users", userService.getAllUsers(page, size)
+                "users", userPage.getContent(),
+                "page", userPage.getNumber(),
+                "size", userPage.getSize(),
+                "totalPages", userPage.getTotalPages(),
+                "totalElements", userPage.getTotalElements()
         ), HttpStatus.OK);
     }
 
