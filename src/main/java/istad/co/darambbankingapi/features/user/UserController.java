@@ -1,5 +1,6 @@
 package istad.co.darambbankingapi.features.user;
 
+import istad.co.darambbankingapi.base.BasedMessage;
 import istad.co.darambbankingapi.features.user.dto.ChangePasswordUser;
 import istad.co.darambbankingapi.features.user.dto.UpdateProfileUser;
 import istad.co.darambbankingapi.features.user.dto.UserCreateRequest;
@@ -18,13 +19,26 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping
+    @GetMapping("/details")
     public ResponseEntity<?> getDetailsAllUsers() {
         return new ResponseEntity<>(
                 Map.of(
                         "users", userService.getAllUsersDetails()
                 ), HttpStatus.OK
         );
+    }
+    @GetMapping
+    public ResponseEntity<?> getAllUsers() {
+        return new ResponseEntity<>(Map.of(
+                "users", userService.getAllUsers()
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/snippets")
+    public ResponseEntity<?> getSnippetsAllUsers() {
+        return new ResponseEntity<>(Map.of(
+                "users",userService.getAllUserSnippets()
+        ), HttpStatus.OK);
     }
 
     @PostMapping
@@ -55,4 +69,28 @@ public class UserController {
         );
     }
 
+    @PutMapping("/{uuid}/block")
+    public BasedMessage blockByUuid(@PathVariable String uuid) {
+        return userService.blockByUuid(uuid);
+    }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<?> deleteUser(@PathVariable String uuid) {
+        userService.deleteByUuid(uuid);
+        return new ResponseEntity<>(
+                Map.of(
+                        "message", "User deleted successfully"
+                ),HttpStatus.OK
+        );
+    }
+
+    @PutMapping("/{uuid}/disable")
+    public BasedMessage disableUser(@PathVariable String uuid) {
+        return userService.disableByUuid(uuid);
+    }
+
+    @PutMapping("/{uuid}/enable")
+    public BasedMessage enableUser(@PathVariable String uuid) {
+        return userService.enableByUuid(uuid);
+    }
 }

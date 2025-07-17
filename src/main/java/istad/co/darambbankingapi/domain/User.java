@@ -1,18 +1,18 @@
 package istad.co.darambbankingapi.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Setter
+@Getter
 @Table(name = "users")
 public class User {
     @Id
@@ -42,7 +42,7 @@ public class User {
     @Column(length = 8, nullable = false)
     private String gender;
 
-    private LocalDateTime dob; //dateOfBirth
+    private LocalDate dob; //dateOfBirth
 
     @Column(length = 100)
     private String cityOrProvince;

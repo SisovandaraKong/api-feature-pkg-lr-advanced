@@ -1,25 +1,25 @@
 package istad.co.darambbankingapi.features.user;
 
+import istad.co.darambbankingapi.base.BasedMessage;
 import istad.co.darambbankingapi.domain.Role;
 import istad.co.darambbankingapi.domain.User;
-import istad.co.darambbankingapi.features.user.dto.ChangePasswordUser;
-import istad.co.darambbankingapi.features.user.dto.UpdateProfileUser;
-import istad.co.darambbankingapi.features.user.dto.UserCreateRequest;
-import istad.co.darambbankingapi.features.user.dto.UserDetailsResponse;
+import istad.co.darambbankingapi.features.user.dto.*;
 import istad.co.darambbankingapi.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -33,6 +33,23 @@ public class UserServiceImpl implements UserService{
                 .map(userMapper::toUserDetailsResponse)
                 .toList();
     }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
+    public List<UserSnippetsResponse> getAllUserSnippets() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(userMapper::toUserSnippetResponse)
+                .toList();
+    }
+
 
     @Override
     public void createNew(UserCreateRequest userCreateRequest) {
@@ -109,7 +126,51 @@ public class UserServiceImpl implements UserService{
     public void updateProfileUser(String uuid, UpdateProfileUser updateProfileUser) {
     User user = userRepository.findByUuid(uuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found"));
+    log.info("User's name before update: {}", user.getName());
+    log.info("User's dob before update: {}", user.getDob().toString());
     userMapper.updateUser(updateProfileUser, user);
+    log.info("User's name after update: {}", user.getName());
+    log.info("User's dob after update: {}", user.getDob().toString());
     userRepository.save(user);
+    }
+
+    @Transactional
+    @Override
+    public BasedMessage blockByUuid(String uuid) {
+        if (!userRepository.existsByUuid(uuid)){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,"User's uuid not found");
+        }
+        userRepository.blockByUuid(uuid);
+        return new BasedMessage("User has been blocked");
+    }
+
+    @Transactional
+    @Override
+    public BasedMessage disableByUuid(String uuid) {
+        if (!userRepository.existsByUuid(uuid)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found");
+        }
+        userRepository.disableByUuid(uuid);
+        return new BasedMessage("User has been disabled");
+    }
+
+    @Transactional
+    @Override
+    public BasedMessage enableByUuid(String uuid) {
+        if (!userRepository.existsByUuid(uuid)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found");
+        }
+        userRepository.enableByUuid(uuid);
+        return new BasedMessage("User has been enabled");
+    }
+
+    @Transactional
+    @Override
+    public void deleteByUuid(String uuid) {
+        if (!userRepository.existsByUuid(uuid)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found");
+        }
+        userRepository.deleteByUuid(uuid);
     }
 }

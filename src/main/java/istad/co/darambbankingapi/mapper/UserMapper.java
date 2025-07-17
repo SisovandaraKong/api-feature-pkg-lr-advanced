@@ -2,9 +2,7 @@ package istad.co.darambbankingapi.mapper;
 
 import istad.co.darambbankingapi.domain.Role;
 import istad.co.darambbankingapi.domain.User;
-import istad.co.darambbankingapi.features.user.dto.UpdateProfileUser;
-import istad.co.darambbankingapi.features.user.dto.UserCreateRequest;
-import istad.co.darambbankingapi.features.user.dto.UserDetailsResponse;
+import istad.co.darambbankingapi.features.user.dto.*;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -29,4 +27,8 @@ public interface UserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUser(UpdateProfileUser updateProfileUser, @MappingTarget User user);
+
+    UserResponse toUserResponse(User user);
+
+    UserSnippetsResponse toUserSnippetResponse(User user);
 }
