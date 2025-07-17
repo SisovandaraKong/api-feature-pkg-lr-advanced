@@ -28,9 +28,10 @@ public class UserController {
         );
     }
     @GetMapping
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(@RequestParam(required = false, defaultValue = "0") int page,
+                                             @RequestParam(required = false,defaultValue = "2")int size) {
         return new ResponseEntity<>(Map.of(
-                "users", userService.getAllUsers()
+                "users", userService.getAllUsers(page, size)
         ), HttpStatus.OK);
     }
 
@@ -39,6 +40,12 @@ public class UserController {
         return new ResponseEntity<>(Map.of(
                 "users",userService.getAllUserSnippets()
         ), HttpStatus.OK);
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<?> getUserByUuid(@PathVariable String uuid) {
+        return new ResponseEntity<>(
+                userService.getUserByUuid(uuid), HttpStatus.OK);
     }
 
     @PostMapping

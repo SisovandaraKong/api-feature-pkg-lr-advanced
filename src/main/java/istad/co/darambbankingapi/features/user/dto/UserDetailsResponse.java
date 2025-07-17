@@ -26,7 +26,7 @@ public record UserDetailsResponse(
         Boolean isStudent,
         Boolean isBlocked,
         String oneSignalId,
-        List<String> roles,
+        List<RoleNameResponse> roles,
         LocalDateTime createdAt
 ) {
 }

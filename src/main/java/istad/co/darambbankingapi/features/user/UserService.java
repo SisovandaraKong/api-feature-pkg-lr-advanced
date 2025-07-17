@@ -2,13 +2,15 @@ package istad.co.darambbankingapi.features.user;
 
 import istad.co.darambbankingapi.base.BasedMessage;
 import istad.co.darambbankingapi.features.user.dto.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface UserService {
     List<UserDetailsResponse> getAllUsersDetails();
-    List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(int page, int size);
     List<UserSnippetsResponse> getAllUserSnippets();
+    UserResponse getUserByUuid(String uuid);
 
     void createNew(UserCreateRequest userCreateRequest);
 

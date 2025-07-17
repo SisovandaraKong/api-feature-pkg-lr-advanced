@@ -7,6 +7,8 @@ import istad.co.darambbankingapi.features.user.dto.*;
 import istad.co.darambbankingapi.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +37,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(userMapper::toUserResponse)
-                .toList();
+    public Page<UserResponse> getAllUsers(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<User> users = userRepository.findAll(pageRequest);
+        return users.map(userMapper::toUserResponse);
     }
 
     @Override
@@ -48,6 +49,14 @@ public class UserServiceImpl implements UserService{
         return users.stream()
                 .map(userMapper::toUserSnippetResponse)
                 .toList();
+    }
+
+    @Override
+    public UserResponse getUserByUuid(String uuid) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "User with uuid " + uuid + " not found"));
+        return userMapper.toUserResponse(user);
     }
 
 

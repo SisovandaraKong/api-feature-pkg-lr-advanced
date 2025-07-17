@@ -13,17 +13,7 @@ public interface UserMapper {
     // TargetType = User (ReturnType)
     User fromUserCreateRequest(UserCreateRequest userCreateRequest);
 
-    // Map User → UserDetailsResponse with custom role name list
-    @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesToNames")
     UserDetailsResponse toUserDetailsResponse(User user);
-    // Custom method for mapping List<Role> → List<String>
-    @Named("mapRolesToNames")
-    default List<String> mapRolesToNames(List<Role> roles) {
-        if (roles == null) return null;
-        return roles.stream()
-                .map(Role::getName)
-                .toList();
-    }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUser(UpdateProfileUser updateProfileUser, @MappingTarget User user);

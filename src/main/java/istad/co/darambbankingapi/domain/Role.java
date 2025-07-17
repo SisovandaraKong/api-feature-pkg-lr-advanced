@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Setter
 @Getter
+@ToString
 @Table(name = "roles")
 public class Role {
 
