@@ -1,6 +1,7 @@
 package istad.co.darambbankingapi.init;
 
 import istad.co.darambbankingapi.domain.Role;
+import istad.co.darambbankingapi.enums.RoleName;
 import istad.co.darambbankingapi.features.user.RoleRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +20,13 @@ public class RoleInit {
         //Check if count have 0 record/data in database so inject
     if (roleRepository.count() < 1){
         Role role = new Role();
-        role.setName("USER");
+        role.setName(RoleName.USER);
         Role customer = new Role();
-        customer.setName("CUSTOMER");
+        customer.setName(RoleName.CUSTOMER);
         Role staff = new Role();
-        staff.setName("STAFF");
+        staff.setName(RoleName.STAFF);
         Role admin = new Role();
-        admin.setName("ADMIN");
+        admin.setName(RoleName.ADMIN);
         roleRepository.saveAll(
                 List.of(role, customer, staff, admin)
         );

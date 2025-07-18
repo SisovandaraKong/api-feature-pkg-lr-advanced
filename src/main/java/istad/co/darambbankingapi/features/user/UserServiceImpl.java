@@ -3,6 +3,7 @@ package istad.co.darambbankingapi.features.user;
 import istad.co.darambbankingapi.base.BasedMessage;
 import istad.co.darambbankingapi.domain.Role;
 import istad.co.darambbankingapi.domain.User;
+import istad.co.darambbankingapi.enums.RoleName;
 import istad.co.darambbankingapi.features.user.dto.*;
 import istad.co.darambbankingapi.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -99,19 +101,22 @@ public class UserServiceImpl implements UserService{
 
         // By me
         // Add default USER role
-        Role userRole = roleRepository.findByName("USER")
+        Role userRole = roleRepository.findByName(RoleName.USER)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Role USER not found"));
 
-        //Assign default user role
-        List<Role> roles = userCreateRequest.roles().stream()
-                .map(role -> roleRepository.findByName(role.name())
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.NOT_FOUND, "Role " + role.name() + " not found")))
-                .collect(Collectors.toList());
 
+        List<Role> roles = userCreateRequest.roles()
+                .stream()
+                .map(r -> {
+                    RoleName role = RoleName.valueOf(r.name().toUpperCase());
+                    return roleRepository.findByName(role)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
+                }).collect(Collectors.toList());
 
-        roles.add(userRole);
+        if (roles.stream().noneMatch(r -> r.getName() == RoleName.USER)) {
+            roles.add(userRole);
+        }
 
         user.setRoles(roles);
         userRepository.save(user);

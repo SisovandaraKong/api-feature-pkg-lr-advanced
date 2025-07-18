@@ -1,5 +1,6 @@
 package istad.co.darambbankingapi.domain;
 
+import istad.co.darambbankingapi.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +20,8 @@ public class Role {
     private Integer id;
 
     @Column(nullable = false, unique = true)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private RoleName name;
 
     @ManyToMany(mappedBy = "roles")
     private List<User> users;
