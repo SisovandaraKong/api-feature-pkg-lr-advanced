@@ -7,12 +7,12 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BasedError {
+public class BasedError<T> {
     // Request entity too large, bad request,...
     // For some company can custom this status code
     private String code;
 
     // Detail error for user
-    private String description;
+    private T description;
 
 }

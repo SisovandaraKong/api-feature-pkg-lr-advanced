@@ -1,5 +1,7 @@
 package istad.co.darambbankingapi.exception;
 
+import istad.co.darambbankingapi.base.BasedError;
+import istad.co.darambbankingapi.base.BasedErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,12 +16,13 @@ import java.util.Objects;
 public class HandleServiceException {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<?> handleServiceException(ResponseStatusException exception){
-        return new ResponseEntity<>(Map.of(
-                "message", "Error business login",
-                "status", exception.getStatusCode().value(),
-                "timestamp", LocalDateTime.now(),
-                "details", exception.getReason()
-        ),HttpStatus.BAD_REQUEST);
+        BasedError<String> basedError = new BasedError<>();
+        basedError.setCode(exception.getStatusCode().toString());
+        basedError.setDescription(exception.getReason());
+
+        BasedErrorResponse basedErrorResponse = new BasedErrorResponse();
+        basedErrorResponse.setError(basedError);
+        return new ResponseEntity<>(basedErrorResponse,HttpStatus.BAD_REQUEST);
     }
 
 }

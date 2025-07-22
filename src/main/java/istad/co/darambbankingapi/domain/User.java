@@ -88,8 +88,6 @@ public class User {
     private List<UserAccount> userAccountList;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    // This means when we fetch user,
-    // it will fetch all roles that related to that user too
     @JoinTable(name = "users_roles"
     ,joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id")
     ,inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))

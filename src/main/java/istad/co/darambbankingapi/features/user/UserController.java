@@ -1,10 +1,8 @@
 package istad.co.darambbankingapi.features.user;
 
 import istad.co.darambbankingapi.base.BasedMessage;
-import istad.co.darambbankingapi.features.user.dto.ChangePasswordUser;
-import istad.co.darambbankingapi.features.user.dto.UpdateProfileUser;
-import istad.co.darambbankingapi.features.user.dto.UserCreateRequest;
-import istad.co.darambbankingapi.features.user.dto.UserResponse;
+import istad.co.darambbankingapi.base.BasedResponse;
+import istad.co.darambbankingapi.features.user.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -106,5 +104,13 @@ public class UserController {
     @PutMapping("/{uuid}/enable")
     public BasedMessage enableUser(@PathVariable String uuid) {
         return userService.enableByUuid(uuid);
+    }
+
+    @PutMapping("/{uuid}/profile-image")
+    public BasedResponse<?> updateProfileImage(@PathVariable String uuid, @Valid @RequestBody UserProfileImageRequest userProfileImageRequest) {
+        String uriUserImage = userService.updateProfileImage(uuid,userProfileImageRequest.mediaName());
+        return BasedResponse.builder()
+                .payload(uriUserImage)
+                .build();
     }
 }

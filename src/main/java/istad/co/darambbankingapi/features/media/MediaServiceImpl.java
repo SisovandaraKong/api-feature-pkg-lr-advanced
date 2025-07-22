@@ -22,6 +22,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -102,6 +103,37 @@ public class MediaServiceImpl implements MediaService {
                     e.getLocalizedMessage());
         }
     }
+
+    @Override
+    public List<MediaResponse> loadAllMedia(String folderName) {
+        List<MediaResponse> mediaResponses = new ArrayList<>();
+
+        try (Stream<Path> paths = Files.walk(Paths.get(serverPath + folderName + "\\"))) {
+            paths.filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        try {
+                            String mediaName = path.getFileName().toString();
+
+                            MediaResponse mediaResponse = MediaResponse.builder()
+                                    .name(mediaName)
+                                    .contentType(Files.probeContentType(path))
+                                    .extension(MediaUtil.extractExtension(mediaName))
+                                    .size(Files.size(path))
+                                    .uri(String.format("%s%s/%s", baseUri, folderName, mediaName))
+                                    .build();
+
+                            mediaResponses.add(mediaResponse);
+                        } catch (IOException e) {
+                            log.warn("Failed to load media file: {}", path, e);
+                        }
+                    });
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to read media directory");
+        }
+
+        return mediaResponses;
+    }
+
 
     @Override
     public MediaResponse deleteMediaByName(String mediaName, String folderName) {

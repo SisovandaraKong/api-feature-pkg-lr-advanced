@@ -8,6 +8,7 @@ import istad.co.darambbankingapi.features.user.dto.*;
 import istad.co.darambbankingapi.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,9 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+
+    @Value("${media.base-uri}")
+    private String mediaBaseUri;
 
     @Override
     public List<UserDetailsResponse> getAllUsersDetails() {
@@ -186,5 +190,14 @@ public class UserServiceImpl implements UserService{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found");
         }
         userRepository.deleteByUuid(uuid);
+    }
+
+    @Override
+    public String updateProfileImage(String uuid, String mediaName) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User's uuid not found"));
+        user.setProfileImage(mediaName);
+        userRepository.save(user);
+        return mediaBaseUri + "/images/" + mediaName;
     }
 }

@@ -21,4 +21,6 @@ public interface UserService {
     BasedMessage disableByUuid(String uuid);
     BasedMessage enableByUuid(String uuid);
     void deleteByUuid(String uuid);
+
+    String updateProfileImage(String uuid, String mediaName);
 }
