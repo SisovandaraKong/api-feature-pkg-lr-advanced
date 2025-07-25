@@ -21,11 +21,13 @@ public class UserAccount {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id")
     private Account account;
 
     private LocalDateTime createdAt;
 
     private Boolean isDeleted;
+
+    private Boolean isBlocked;
 }

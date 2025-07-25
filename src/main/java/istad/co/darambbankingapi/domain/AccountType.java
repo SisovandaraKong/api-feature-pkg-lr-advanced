@@ -19,8 +19,7 @@ public class AccountType {
     private Integer id;
 
     @Column(nullable = false, unique = true, length = 100)
-    @Enumerated(EnumType.STRING)
-    private AccountTypeName name;
+    private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;

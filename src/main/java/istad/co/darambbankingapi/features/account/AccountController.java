@@ -1,0 +1,37 @@
+package istad.co.darambbankingapi.features.account;
+
+import istad.co.darambbankingapi.features.account.dto.AccountRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/v1/accounts")
+@RequiredArgsConstructor
+public class AccountController {
+    private final AccountService accountService;
+
+    @PostMapping
+    public ResponseEntity<?> createAccount(@Valid @RequestBody AccountRequest accountRequest){
+        accountService.createAccount(accountRequest);
+        return new ResponseEntity<>(Map.of(
+                "message", "Account created successfully"
+        ), HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllAccounts(){
+        return new ResponseEntity<>(Map.of(
+                "accounts",accountService.getAllAccounts()
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/{actNo}")
+    public ResponseEntity<?> getAccountByActNo(@PathVariable String actNo){
+        return new ResponseEntity<>(accountService.getAccountByActNo(actNo), HttpStatus.OK);
+    }
+}

@@ -24,7 +24,7 @@ public class Account {
     private String actName;
 
     @Column(length = 100)
-    private String alies; //nickname
+    private String alias; //nickname
 
     @Column(nullable = false)
     private BigDecimal balance;

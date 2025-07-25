@@ -1,0 +1,76 @@
+package istad.co.darambbankingapi.features.account;
+
+import istad.co.darambbankingapi.domain.Account;
+import istad.co.darambbankingapi.domain.AccountType;
+import istad.co.darambbankingapi.domain.User;
+import istad.co.darambbankingapi.domain.UserAccount;
+import istad.co.darambbankingapi.features.account.dto.AccountRequest;
+import istad.co.darambbankingapi.features.account.dto.AccountResponse;
+import istad.co.darambbankingapi.features.accountType.AccountTypeRepository;
+import istad.co.darambbankingapi.features.user.UserRepository;
+import istad.co.darambbankingapi.mapper.AccountMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Random;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class AccountServiceImpl implements AccountService {
+    private final UserAccountRepository userAccountRepository;
+    private final AccountRepository accountRepository;
+    private final AccountTypeRepository accountTypeRepository;
+    private final UserRepository userRepository;
+    private final AccountMapper accountMapper;
+
+    @Override
+    public void createAccount(AccountRequest accountRequest) {
+
+        AccountType accountType = accountTypeRepository.findAccountTypeByName(accountRequest.accountTypeName())
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Invalid account type"));
+
+        User user = userRepository.findByUuid(accountRequest.userUuid())
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Invalid user's uuid"));
+
+        Account account = accountMapper.fromAccountRequest(accountRequest);
+        account.setAccountType(accountType);
+        account.setActName(user.getName());
+        String actNo;
+        do {
+            actNo = String.format("%09d", new Random().nextInt(1_000_000_000));
+        } while (accountRepository.existsByActNo(actNo));
+        account.setActNo(actNo);
+        account.setTransferLimit(BigDecimal.valueOf(5000));
+        account.setIsHidden(false);
+
+        UserAccount userAccount = new UserAccount();
+        userAccount.setAccount(account);
+        userAccount.setUser(user);
+        userAccount.setIsDeleted(false);
+        userAccount.setIsBlocked(false);
+        userAccount.setCreatedAt(LocalDateTime.now());
+        userAccountRepository.save(userAccount);
+    }
+
+    @Override
+    public AccountResponse getAccountByActNo(String actNo) {
+        Account account = accountRepository.findByActNo(actNo)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Account Number is not found"));
+        return accountMapper.toAccountResponse(account);
+    }
+
+    @Override
+    public List<AccountResponse> getAllAccounts() {
+        List<Account> accounts = accountRepository.findAll();
+        return accounts.stream()
+                .map(accountMapper::toAccountResponse)
+                .toList();
+    }
+}
