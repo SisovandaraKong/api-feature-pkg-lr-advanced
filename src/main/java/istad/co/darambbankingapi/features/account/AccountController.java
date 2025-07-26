@@ -1,5 +1,6 @@
 package istad.co.darambbankingapi.features.account;
 
+import istad.co.darambbankingapi.features.account.dto.AccountRename;
 import istad.co.darambbankingapi.features.account.dto.AccountRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,10 @@ public class AccountController {
     @GetMapping("/{actNo}")
     public ResponseEntity<?> getAccountByActNo(@PathVariable String actNo){
         return new ResponseEntity<>(accountService.getAccountByActNo(actNo), HttpStatus.OK);
+    }
+
+    @PutMapping("/{actNo}/rename")
+    public ResponseEntity<?> renameAccount(@PathVariable String actNo, @Valid @RequestBody AccountRename accountRename){
+        return new ResponseEntity<>(accountService.renameAccount(actNo, accountRename), HttpStatus.OK);
     }
 }

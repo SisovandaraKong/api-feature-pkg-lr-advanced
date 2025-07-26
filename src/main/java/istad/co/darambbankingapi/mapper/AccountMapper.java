@@ -12,15 +12,13 @@ import org.mapstruct.Named;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {
+        UserMapper.class
+})
 public interface AccountMapper {
     @Mapping(source = "userAccountList", target = "user", qualifiedByName = "mapUserResponse")
     AccountResponse toAccountResponse(Account account);
 
-    @Named(value = "mapUserResponse")
-    default UserResponse mapUserResponse(List<UserAccount> userAccountList) {
-        return toUserResponse(userAccountList.getFirst().getUser());
-    }
 
     UserResponse toUserResponse(User user);
 

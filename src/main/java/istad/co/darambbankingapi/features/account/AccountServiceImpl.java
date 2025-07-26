@@ -4,6 +4,7 @@ import istad.co.darambbankingapi.domain.Account;
 import istad.co.darambbankingapi.domain.AccountType;
 import istad.co.darambbankingapi.domain.User;
 import istad.co.darambbankingapi.domain.UserAccount;
+import istad.co.darambbankingapi.features.account.dto.AccountRename;
 import istad.co.darambbankingapi.features.account.dto.AccountRequest;
 import istad.co.darambbankingapi.features.account.dto.AccountResponse;
 import istad.co.darambbankingapi.features.accountType.AccountTypeRepository;
@@ -72,5 +73,19 @@ public class AccountServiceImpl implements AccountService {
         return accounts.stream()
                 .map(accountMapper::toAccountResponse)
                 .toList();
+    }
+
+    @Override
+    public AccountResponse renameAccount(String actNo, AccountRename accountRename) {
+        Account account = accountRepository.findByActNo(actNo)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Account Number is not found"));
+
+        // Check if the same name
+        if (accountRename.newName().equals(account.getAlias())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Account name already exists");
+        }
+        account.setAlias(accountRename.newName());
+        account = accountRepository.save(account);
+        return accountMapper.toAccountResponse(account);
     }
 }
