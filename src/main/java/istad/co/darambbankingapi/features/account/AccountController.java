@@ -2,8 +2,10 @@ package istad.co.darambbankingapi.features.account;
 
 import istad.co.darambbankingapi.features.account.dto.AccountRename;
 import istad.co.darambbankingapi.features.account.dto.AccountRequest;
+import istad.co.darambbankingapi.features.account.dto.AccountResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +34,16 @@ public class AccountController {
 //    }
 
     @GetMapping
-    public ResponseEntity<?> findAccountList(@RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false,defaultValue = "1") int size){
-        return new ResponseEntity<>(accountService.findAllAccounts(page, size), HttpStatus.OK);
+    public ResponseEntity<?> findAccountList(@RequestParam(required = false, defaultValue = "0") int page,
+                                             @RequestParam(required = false,defaultValue = "10") int size){
+        Page<AccountResponse> accountPage = accountService.findAllAccounts(page, size);
+        return new ResponseEntity<>(Map.of(
+                "users",accountPage.getContent(),
+                "pages", accountPage.getNumber(),
+                "size", accountPage.getSize(),
+                "totalPages", accountPage.getTotalPages(),
+                "totalElements", accountPage.getTotalElements()
+        ), HttpStatus.OK);
     }
 
     @GetMapping("/{actNo}")
