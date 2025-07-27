@@ -24,11 +24,16 @@ public class AccountController {
         ), HttpStatus.CREATED);
     }
 
+//    @GetMapping
+//    public ResponseEntity<?> getAllAccounts(){
+//        return new ResponseEntity<>(Map.of(
+//                "accounts",accountService.getAllAccounts()
+//        ), HttpStatus.OK);
+//    }
+
     @GetMapping
-    public ResponseEntity<?> getAllAccounts(){
-        return new ResponseEntity<>(Map.of(
-                "accounts",accountService.getAllAccounts()
-        ), HttpStatus.OK);
+    public ResponseEntity<?> findAccountList(@RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false,defaultValue = "1") int size){
+        return new ResponseEntity<>(accountService.findAllAccounts(page, size), HttpStatus.OK);
     }
 
     @GetMapping("/{actNo}")
@@ -39,5 +44,13 @@ public class AccountController {
     @PutMapping("/{actNo}/rename")
     public ResponseEntity<?> renameAccount(@PathVariable String actNo, @Valid @RequestBody AccountRename accountRename){
         return new ResponseEntity<>(accountService.renameAccount(actNo, accountRename), HttpStatus.OK);
+    }
+
+    @PutMapping("/{actNo}/hide")
+    public ResponseEntity<?> hideAccount(@PathVariable String actNo){
+        accountService.hideAccount(actNo);
+        return new ResponseEntity<>(Map.of(
+                "message", "Account has been hidden"
+        ), HttpStatus.OK);
     }
 }
