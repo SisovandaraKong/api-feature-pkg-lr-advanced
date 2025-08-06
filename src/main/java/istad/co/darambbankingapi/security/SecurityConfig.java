@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -46,8 +47,6 @@ public class SecurityConfig {
     // To customize security
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
-
         // Our logic, all endpoint have security
 
         httpSecurity
@@ -59,6 +58,13 @@ public class SecurityConfig {
 
         // Use default http basic ( username, password )
         httpSecurity.httpBasic(Customizer.withDefaults());
+
+        // Disable csrf
+        httpSecurity.csrf(token->token.disable());
+        // Not store anything on server, and can do it should disable csrf first
+        httpSecurity.sessionManagement(session-> session.sessionCreationPolicy(
+                SessionCreationPolicy.STATELESS
+        ));
         return httpSecurity.build();
     }
 
