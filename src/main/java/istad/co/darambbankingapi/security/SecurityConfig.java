@@ -4,6 +4,8 @@ package istad.co.darambbankingapi.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,49 +22,64 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
 
 
     // Store in ram, like if start it has and if close it lost
+//    @Bean
+//    InMemoryUserDetailsManager inMemoryUserDetailsManager(){
+//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+//
+//        UserDetails userAdmin = User.builder()
+//                .username("admin")
+//                .password(passwordEncoder.encode("admin"))
+//                .roles("USER", "ADMIN")
+//                .build();
+//
+//        UserDetails userEditor = User.builder()
+//                .username("editor")
+//                .password(passwordEncoder.encode("editor"))
+//                .roles("USER", "EDITOR")
+//                .build();
+//
+//        manager.createUser(userAdmin);
+//        manager.createUser(userEditor);
+//        return manager;
+//    }
+
+    // Implement UserDetailsService, Best for test
     @Bean
-    InMemoryUserDetailsManager inMemoryUserDetailsManager(){
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-
-        UserDetails userAdmin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin"))
-                .roles("USER", "ADMIN")
-                .build();
-
-        UserDetails userEditor = User.builder()
-                .username("editor")
-                .password(passwordEncoder.encode("editor"))
-                .roles("USER", "EDITOR")
-                .build();
-
-        manager.createUser(userAdmin);
-        manager.createUser(userEditor);
-        return manager;
+    DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
     }
 
     // To customize security
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         // Our logic, all endpoint have security
 
         httpSecurity
                 .authorizeHttpRequests(request -> // Define endpoint client request
                         request
-                                .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
-                                .anyRequest() // Mean all request should authenticated
+                                .requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyRole("CUSTOMER", "ADMIN")
+                                .anyRequest() // Mean all request should authenticate
                                 .authenticated());
+
+        // Disable form login of web
+        httpSecurity.formLogin(form -> form.disable());
 
         // Use default http basic ( username, password )
         httpSecurity.httpBasic(Customizer.withDefaults());
 
         // Disable csrf
-        httpSecurity.csrf(token->token.disable());
+        httpSecurity.csrf(token -> token.disable());
         // Not store anything on server, and can do it should disable csrf first
-        httpSecurity.sessionManagement(session-> session.sessionCreationPolicy(
+        httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS
         ));
         return httpSecurity.build();

@@ -29,4 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("UPDATE User AS u SET u.isDeleted = FALSE WHERE u.uuid = ?1")
     void enableByUuid(String uuid);
+
+    Optional<User> findByPhoneNumber(String phoneNumber);
 }

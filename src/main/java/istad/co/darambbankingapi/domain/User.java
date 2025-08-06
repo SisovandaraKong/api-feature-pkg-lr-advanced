@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @Setter
 @Getter
-@ToString
 @Table(name = "users")
 public class User {
     @Id
@@ -77,8 +76,10 @@ public class User {
     @Column(unique = true)
     private String oneSignalId;
 
+    private boolean isAccountNonExpired;
+    private boolean isAccountNonLocked;
+    private boolean isCredentialsNonExpired;
     private Boolean isDeleted;
-    private Boolean isStudent;
     private Boolean isBlocked;
 
     @Column(unique = true, nullable = false)
@@ -87,7 +88,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserAccount> userAccountList;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles"
     ,joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id")
     ,inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
