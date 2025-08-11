@@ -45,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
                 .issuedAt(now)
                 .expiresAt(now.plus(5, ChronoUnit.MINUTES))
                 .issuer(userDetails.getUsername())
+                .claim("scope","READ WRITE DELETE")
                 .build();
         String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
 
