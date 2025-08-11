@@ -84,9 +84,13 @@ public class SecurityConfig {
                         request
                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyRole("CUSTOMER", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("SCOPE_user:write")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAuthority("SCOPE_user:write")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAuthority("SCOPE_user:read")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/accounts/**").hasAnyAuthority("SCOPE_ROLE_ADMIN", "SCOPE_account:read")
                                 .anyRequest() // Mean all request should authenticate
                                 .authenticated());
 
@@ -101,6 +105,7 @@ public class SecurityConfig {
 
         // Disable csrf
         httpSecurity.csrf(token -> token.disable());
+
         // Not store anything on server, and can do it should disable csrf first
         httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS
