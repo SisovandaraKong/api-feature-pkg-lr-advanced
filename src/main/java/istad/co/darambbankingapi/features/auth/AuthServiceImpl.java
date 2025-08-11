@@ -5,6 +5,8 @@ import istad.co.darambbankingapi.features.auth.dto.LoginRequest;
 import istad.co.darambbankingapi.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -25,6 +27,13 @@ import java.util.stream.Collectors;
 public class AuthServiceImpl implements AuthService {
     private final DaoAuthenticationProvider daoAuthenticationProvider;
     private final JwtEncoder jwtEncoder;
+    private JwtEncoder refreshJwtEncoder;
+
+    @Qualifier("refreshJwtEncoder")
+    @Autowired
+    public void setRefreshJwtEncoder(JwtEncoder refreshJwtEncoder) {
+        this.refreshJwtEncoder = refreshJwtEncoder;
+    }
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
@@ -55,12 +64,24 @@ public class AuthServiceImpl implements AuthService {
                 .issuer(userDetails.getUsername())
                 .claim("scope",scope)
                 .build();
+
+        JwtClaimsSet refreshJwtClaimsSet = JwtClaimsSet.builder()
+                .id(userDetails.getUsername())
+                .subject("Refresh Resource")
+                .audience(List.of("WEB","MOBILE"))
+                .issuedAt(now)
+                .expiresAt(now.plus(1, ChronoUnit.DAYS))
+                .issuer(userDetails.getUsername())
+                .claim("scope",scope)
+                .build();
+
         String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
+        String refreshToken = refreshJwtEncoder.encode(JwtEncoderParameters.from(refreshJwtClaimsSet)).getTokenValue();
 
         return new AuthResponse(
                 "Bearer",
                 accessToken,
-                ""
+                refreshToken
         );
     }
 }

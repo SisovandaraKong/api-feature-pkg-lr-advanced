@@ -10,8 +10,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -112,9 +114,11 @@ public class SecurityConfig {
         ));
         return httpSecurity.build();
     }
+    // JWT access token================================
 
     // Generate an RSA public/private key pair (asymmetric cryptography)
     // The private key will be used to sign JWTs, and the public key will be used to verify them
+    @Primary
     @Bean
     KeyPair keyPair() {
         try {
@@ -127,6 +131,7 @@ public class SecurityConfig {
 
     // Wrap the generated KeyPair into an RSAKey object (Nimbus JOSE library format)
     // Includes both public and private keys, plus a unique key ID
+    @Primary
     @Bean
     RSAKey rsaKey(KeyPair keyPair) {
         return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
@@ -135,12 +140,14 @@ public class SecurityConfig {
                 .build();
     }
 
+    @Primary
     @Bean
     JWKSource<SecurityContext> jwkSource(RSAKey rsaKey) {
         JWKSet jwkSet = new JWKSet(rsaKey);
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
     }
 
+    @Primary
     @Bean
     JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource){
         return new NimbusJwtEncoder(jwkSource);
@@ -148,8 +155,51 @@ public class SecurityConfig {
 
     // Create jwtDecoder use Public key of RSA, it can decode jwt token
     // This allows the Resource Server to validate incoming tokens
+    @Primary
     @Bean
     JwtDecoder jwtDecoder(RSAKey rsaKey) throws JOSEException {
+        return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
+                .build();
+    }
+
+
+    // JWT refresh token============================
+
+    @Bean("refreshKeyPair")
+    KeyPair refreshKeyPair() {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            return keyPairGenerator.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Wrap the generated KeyPair into an RSAKey object (Nimbus JOSE library format)
+    // Includes both public and private keys, plus a unique key ID
+    @Bean("refreshRsaKey")
+    RSAKey refreshRsaKey(@Qualifier("refreshKeyPair") KeyPair keyPair) {
+        return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+                .privateKey(keyPair.getPrivate())
+                .keyID(UUID.randomUUID().toString())
+                .build();
+    }
+
+    @Bean("refreshJwkSource")
+    JWKSource<SecurityContext> refreshJwkSource(@Qualifier("refreshRsaKey") RSAKey rsaKey) {
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+    }
+
+    @Bean("refreshJwtEncoder")
+    JwtEncoder refreshJwtEncoder(@Qualifier("refreshJwkSource") JWKSource<SecurityContext> jwkSource){
+        return new NimbusJwtEncoder(jwkSource);
+    }
+
+    // Create jwtDecoder use Public key of RSA, it can decode jwt token
+    // This allows the Resource Server to validate incoming tokens
+    @Bean("refreshJwtDecoder")
+    JwtDecoder refreshJwtDecoder(@Qualifier("refreshRsaKey") RSAKey rsaKey) throws JOSEException {
         return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
                 .build();
     }
