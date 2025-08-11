@@ -1,6 +1,14 @@
 package istad.co.darambbankingapi.security;
 
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.KeySourceException;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSelector;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +22,19 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPublicKey;
+import java.util.List;
+import java.util.UUID;
 
 @Configuration
 @EnableWebSecurity
@@ -63,6 +82,7 @@ public class SecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(request -> // Define endpoint client request
                         request
+                                .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("ADMIN")
@@ -73,8 +93,11 @@ public class SecurityConfig {
         // Disable form login of web
         httpSecurity.formLogin(form -> form.disable());
 
-        // Use default http basic ( username, password )
-        httpSecurity.httpBasic(Customizer.withDefaults());
+        // Use default http basic ( username, password ), it called mechanism
+//        httpSecurity.httpBasic(Customizer.withDefaults());
+        // Use jwt mechanism to get token and access
+        httpSecurity.oauth2ResourceServer(jwt->jwt
+                .jwt(Customizer.withDefaults()));
 
         // Disable csrf
         httpSecurity.csrf(token -> token.disable());
@@ -85,4 +108,46 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
+    // Generate an RSA public/private key pair (asymmetric cryptography)
+    // The private key will be used to sign JWTs, and the public key will be used to verify them
+    @Bean
+    KeyPair keyPair() {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            return keyPairGenerator.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Wrap the generated KeyPair into an RSAKey object (Nimbus JOSE library format)
+    // Includes both public and private keys, plus a unique key ID
+    @Bean
+    RSAKey rsaKey(KeyPair keyPair) {
+        return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
+                .privateKey(keyPair.getPrivate())
+                .keyID(UUID.randomUUID().toString())
+                .build();
+    }
+
+    @Bean
+    JWKSource<SecurityContext> jwkSource(RSAKey rsaKey) {
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+    }
+
+    @Bean
+    JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource){
+        return new NimbusJwtEncoder(jwkSource);
+    }
+
+    // Create jwtDecoder use Public key of RSA, it can decode jwt token
+    // This allows the Resource Server to validate incoming tokens
+    @Bean
+    JwtDecoder jwtDecoder(RSAKey rsaKey) throws JOSEException {
+        return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
+                .build();
+    }
+
 }
+

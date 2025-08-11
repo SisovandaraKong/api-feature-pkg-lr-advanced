@@ -32,6 +32,7 @@ public class CustomUserDetails implements UserDetails {
         return user.getPhoneNumber();
     }
 
+    // if these all under this false once, cannot log auth
     @Override
     public boolean isAccountNonExpired() {
         return user.isAccountNonExpired();
