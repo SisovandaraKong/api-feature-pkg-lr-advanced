@@ -2,6 +2,7 @@ package istad.co.darambbankingapi.features.auth;
 
 import istad.co.darambbankingapi.features.auth.dto.AuthResponse;
 import istad.co.darambbankingapi.features.auth.dto.LoginRequest;
+import istad.co.darambbankingapi.features.auth.dto.RefreshTokenRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+
+    @PostMapping("/refresh")
+    AuthResponse refresh(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return authService.refresh(refreshTokenRequest);
+    }
 
     @PostMapping("/login")
     AuthResponse login(@Valid @RequestBody LoginRequest loginRequest) {

@@ -2,6 +2,7 @@ package istad.co.darambbankingapi.features.auth;
 
 import istad.co.darambbankingapi.features.auth.dto.AuthResponse;
 import istad.co.darambbankingapi.features.auth.dto.LoginRequest;
+import istad.co.darambbankingapi.features.auth.dto.RefreshTokenRequest;
 import istad.co.darambbankingapi.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +12,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
     private final DaoAuthenticationProvider daoAuthenticationProvider;
+    private final JwtAuthenticationProvider jwtAuthenticationProvider;
     private final JwtEncoder jwtEncoder;
     private JwtEncoder refreshJwtEncoder;
 
@@ -36,9 +41,42 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public AuthResponse refresh(RefreshTokenRequest refreshTokenRequest) {
+        Authentication auth = new BearerTokenAuthenticationToken(
+                refreshTokenRequest.refreshToken()
+        );
+
+        auth = jwtAuthenticationProvider.authenticate(auth);
+        Jwt jwt = (Jwt) auth.getPrincipal();
+        log.info(jwt.getId());
+        log.info(jwt.getClaimAsString("scope"));
+
+        Instant now = Instant.now();
+        JwtClaimsSet jwtClaimsSet = JwtClaimsSet.builder()
+                .id(jwt.getId())
+                .subject("Access Resource")
+                .audience(List.of("WEB","MOBILE"))
+                .issuedAt(now)
+                .expiresAt(now.plus(5, ChronoUnit.MINUTES))
+                .issuer(jwt.getId())
+                .claim("scope", jwt.getClaimAsString("scope"))
+                .build();
+
+        String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
+
+        return new AuthResponse(
+                "Bearer",
+                accessToken,
+                refreshTokenRequest.refreshToken()
+        );
+    }
+
+    @Override
     public AuthResponse login(LoginRequest loginRequest) {
 
-        Authentication auth = new UsernamePasswordAuthenticationToken(loginRequest.phoneNumber(), loginRequest.password());
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                loginRequest.phoneNumber(),
+                loginRequest.password());
         auth = daoAuthenticationProvider.authenticate(auth);
 
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
